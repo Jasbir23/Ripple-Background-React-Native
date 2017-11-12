@@ -32,22 +32,30 @@ export default class App extends React.Component {
       newArray: []
     };
   }
-  componentDidMount() {
-    setInterval(() => {
-      let obj = {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        id: Math.random(),
-        toAnimate: true,
-        anim: new Animated.Value(0)
-      };
-      let arr = this.state.rippleArray;
-      arr.push(obj);
-      this.setState({
-        rippleArray: arr
-      });
-    }, 500);
-  }
+  // componentDidMount() {
+  //   setInterval(() => {
+  //     let obj = {
+  //       x: Math.random() * width,
+  //       y: Math.random() * height,
+  //       id: Math.random(),
+  //       toAnimate: true,
+  //       anim: new Animated.Value(0)
+  //     };
+  //     let obj2 = {
+  //       x: (1 - Math.random()) * width,
+  //       y: (1 - Math.random()) * height,
+  //       id: 1 - Math.random(),
+  //       toAnimate: true,
+  //       anim: new Animated.Value(0)
+  //     };
+  //     let arr = this.state.rippleArray;
+  //     arr.push(obj);
+  //     arr.push(obj2);
+  //     this.setState({
+  //       rippleArray: arr
+  //     });
+  //   }, 300);
+  // }
   componentWillMount() {
     var self = this;
     this.setState({
@@ -71,18 +79,17 @@ export default class App extends React.Component {
             anim: new Animated.Value(0)
           };
           let arr = this.state.rippleArray;
-          if (Math.abs(tmpx - dy.x0) > 1 || Math.abs(tmpy - dy.y0) > 1) {
-            tmpx = dy.moveX;
-            tmpy = dy.moveY;
-            arr.push(obj);
-            // this.setState({
-            //   rippleArray: arr
-            // });
-            Animated.event([
-              null, // raw event arg ignored
-              { rippleArray: arr } // gestureState arg
-            ]);
-          }
+          tmpx = dy.moveX;
+          tmpy = dy.moveY;
+          arr.push(obj);
+          // this.setState({
+          //   rippleArray: arr
+          // });
+          Animated.event([
+            null, // raw event arg ignored
+            { rippleArray: arr }, // gestureState arg
+            { useNativeDriver: true }
+          ]);
           // console.log(this.state.rippleArray, "added");
         } // Creates a function to handle the movement and set offsets
         // onPanResponderRelease: (dx, dy) => {
@@ -96,12 +103,10 @@ export default class App extends React.Component {
       })
     });
   }
-  async removeRipple(arr) {
-    (await this.state.moving)
-      ? this.setState({
-          rippleArray: arr
-        })
-      : null;
+  removeRipple(arr) {
+    this.setState({
+      rippleArray: arr
+    });
   }
   render() {
     let tempArray = this.state.rippleArray;
@@ -112,14 +117,15 @@ export default class App extends React.Component {
       >
         <Image
           style={{
-            height: height,
-            width: width + 40,
+            height: height + 50,
+            width: width + 50,
             alignItems: "center",
-            justifyContent: "center"
+            justifyContent: "center",
+            transform: [{ translateX: -25 }, { translateY: -25 }]
           }}
           source={{
             uri:
-              "https://i.pinimg.com/736x/a4/e6/c6/a4e6c66ee72d0488fd5cff4322499e45--wallpaper-for-samsung-galaxy-nexus-wallpaper.jpg"
+              "https://i.pinimg.com/736x/1a/de/fc/1adefc7d9b3ce2560546d549af706c1c--wallpapers-ipad-iphone-s.jpg"
           }}
         >
           <TouchableWithoutFeedback
@@ -162,23 +168,35 @@ export default class App extends React.Component {
                 const dispLf = item.y;
                 const scaleFac = item.anim.interpolate({
                   inputRange: [0, 100],
-                  outputRange: [0.1, 4]
+                  outputRange: [0.5, 3]
+                });
+                const scaleFac2 = item.anim.interpolate({
+                  inputRange: [0, 20, 100],
+                  outputRange: [0.5, 0.5, 3]
+                });
+                const scaleFac3 = item.anim.interpolate({
+                  inputRange: [0, 40, 100],
+                  outputRange: [0.5, 0.5, 3]
+                });
+                const scaleFac4 = item.anim.interpolate({
+                  inputRange: [0, 60, 100],
+                  outputRange: [0.5, 0.5, 3]
+                });
+                const opFac = item.anim.interpolate({
+                  inputRange: [0, 10, 100],
+                  outputRange: [0, 1, 1]
                 });
                 const scaleRevFac = item.anim.interpolate({
                   inputRange: [0, 100],
-                  outputRange: [1, 0.12]
-                });
-                const opFac = item.anim.interpolate({
-                  inputRange: [0, 100],
-                  outputRange: [1, 0]
+                  outputRange: [1, 0.33]
                 });
                 const movX = item.anim.interpolate({
                   inputRange: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                  outputRange: [0, 5, 0, -5, 0, 5, 0, -5, 0, 5, 0]
+                  outputRange: [0, 2, 0, -2, 0, 2, 0, -2, 0, 0, 0]
                 });
                 const movY = item.anim.interpolate({
                   inputRange: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-                  outputRange: [5, 0, -5, 0, 5, -5, 0, 5, -5, 0, 5]
+                  outputRange: [2, 0, -2, 0, 2, -2, 0, 2, 0, 0, 0]
                 });
                 // console.log(item, "djhasbdjasbdjkanbdsjkbj");
                 if (item.toAnimate) {
@@ -186,7 +204,7 @@ export default class App extends React.Component {
                   arr2[index].toAnimate = false;
                   Animated.timing(item.anim, {
                     toValue: 100,
-                    duration: 2500,
+                    duration: 3000,
                     useNativeDriver: true
                   }).start(() => {
                     // console.log("remove this", this.state.rippleArray, item);
@@ -208,46 +226,166 @@ export default class App extends React.Component {
                     this.setState({
                       rippleArray: arr2
                     });
-                  }, 1);
+                  }, 0);
                 }
                 return (
                   <Animated.View
                     key={index}
                     style={{
-                      height: 50,
-                      width: 50,
-                      borderRadius: 25,
-                      borderWidth: 8,
-                      borderColor: "rgba(0,0,0,0.01)",
                       position: "absolute",
-                      overflow: "hidden",
                       top: dispTp,
-                      left: dispLf,
-                      opacity: opFac,
-                      transform: [{ scale: scaleFac }],
-                      justifyContent: "center",
-                      alignItems: "center"
+                      left: dispLf
                     }}
                   >
-                    <Animated.Image
+                    <Animated.View
                       style={{
-                        height: height,
-                        width: width,
-                        borderRadius: 25,
+                        height: 50,
+                        width: 50,
                         position: "absolute",
-                        transform: [
-                          { scale: scaleRevFac },
-                          { translateY: height / 2 - dispTp },
-                          { translateY: movY },
-                          { translateX: movX },
-                          { translateX: width / 2 - dispLf }
-                        ]
+                        top: 0,
+                        borderRadius: 25,
+                        overflow: "hidden",
+                        transform: [{ scale: scaleFac }],
+                        justifyContent: "center",
+                        alignItems: "center"
                       }}
-                      source={{
-                        uri:
-                          "https://i.pinimg.com/736x/a4/e6/c6/a4e6c66ee72d0488fd5cff4322499e45--wallpaper-for-samsung-galaxy-nexus-wallpaper.jpg"
+                    >
+                      <Animated.Image
+                        style={{
+                          opacity: opFac,
+                          height: height + 50,
+                          width: width + 50,
+                          borderRadius: 25,
+                          position: "absolute",
+                          transform: [
+                            { scale: scaleRevFac },
+                            { translateY: height / 2 - dispTp },
+                            { translateY: movY },
+                            { translateX: movX },
+                            { translateX: width / 2 - dispLf },
+                            { translateX: -25 },
+                            { translateY: -25 }
+                          ]
+                        }}
+                        source={{
+                          uri:
+                            "https://i.pinimg.com/736x/1a/de/fc/1adefc7d9b3ce2560546d549af706c1c--wallpapers-ipad-iphone-s.jpg"
+                        }}
+                      />
+                    </Animated.View>
+                    <Animated.View
+                      style={{
+                        height: 50,
+                        width: 50,
+                        position: "absolute",
+                        top: 0,
+                        borderRadius: 25,
+                        overflow: "hidden",
+                        transform: [{ scale: scaleFac2 }],
+                        justifyContent: "center",
+                        alignItems: "center"
                       }}
-                    />
+                    >
+                      <Animated.Image
+                        style={{
+                          opacity: opFac,
+                          height: height + 50,
+                          width: width + 50,
+                          borderRadius: 25,
+                          position: "absolute",
+                          transform: [
+                            { scale: scaleRevFac },
+                            { translateY: height / 2 - dispTp },
+                            { translateY: movY },
+                            { translateX: movX },
+                            { translateX: width / 2 - dispLf },
+                            { translateX: -25 },
+                            { translateY: -25 }
+                          ]
+                        }}
+                        source={{
+                          uri:
+                            "https://i.pinimg.com/736x/1a/de/fc/1adefc7d9b3ce2560546d549af706c1c--wallpapers-ipad-iphone-s.jpg"
+                        }}
+                      />
+                    </Animated.View>
+
+                    <Animated.View
+                      style={{
+                        height: 50,
+                        width: 50,
+                        position: "absolute",
+                        top: 0,
+                        borderRadius: 25,
+                        borderWidth: 8,
+                        borderColor: "rgba(0,0,0,0.01)",
+                        overflow: "hidden",
+                        transform: [{ scale: scaleFac3 }],
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}
+                    >
+                      <Animated.Image
+                        style={{
+                          opacity: opFac,
+                          height: height + 50,
+                          width: width + 50,
+                          borderRadius: 25,
+                          position: "absolute",
+                          transform: [
+                            { scale: scaleRevFac },
+                            { translateY: height / 2 - dispTp },
+                            { translateY: movY },
+                            { translateX: movX },
+                            { translateX: width / 2 - dispLf },
+                            { translateX: -25 },
+                            { translateY: -25 }
+                          ]
+                        }}
+                        source={{
+                          uri:
+                            "https://i.pinimg.com/736x/1a/de/fc/1adefc7d9b3ce2560546d549af706c1c--wallpapers-ipad-iphone-s.jpg"
+                        }}
+                      />
+                    </Animated.View>
+                    <Animated.View
+                      style={{
+                        height: 50,
+                        width: 50,
+                        position: "absolute",
+                        top: 0,
+                        borderRadius: 25,
+                        borderWidth: 8,
+                        borderColor: "rgba(0,0,0,0.01)",
+                        overflow: "hidden",
+                        transform: [{ scale: scaleFac4 }],
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}
+                    >
+                      <Animated.Image
+                        style={{
+                          opacity: opFac,
+                          height: height + 50,
+                          width: width + 50,
+                          borderRadius: 25,
+                          position: "absolute",
+                          transform: [
+                            { scale: scaleRevFac },
+                            { translateY: height / 2 - dispTp },
+                            { translateY: movY },
+                            { translateX: movX },
+                            { translateX: width / 2 - dispLf },
+                            { translateX: -25 },
+                            { translateY: -25 }
+                          ]
+                        }}
+                        source={{
+                          uri:
+                            "https://i.pinimg.com/736x/1a/de/fc/1adefc7d9b3ce2560546d549af706c1c--wallpapers-ipad-iphone-s.jpg"
+                        }}
+                      />
+                    </Animated.View>
                   </Animated.View>
                 );
               })}
